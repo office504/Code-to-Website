@@ -1,0 +1,218 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { ClipboardList, ShieldAlert, CheckCircle, AlertTriangle, Info, ArrowLeft, RefreshCw } from 'lucide-react';
+
+const questionsData = [
+  { id: 1, left: "אני בדרך כלל משועמם/מת", right: "אני בדרך כלל מלא/ת התלהבות" },
+  { id: 2, left: "החיים נראים לי שגרתיים לחלוטין", right: "החיים תמיד מרגשים ומלאי עניין" },
+  { id: 3, left: "אין לי מטרות כלשהן בחיי", right: "יש לי מטרות ברורות מאוד" },
+  { id: 4, left: "קיומי האישי חסר משמעות לחלוטין", right: "קיומי מלא משמעות" },
+  { id: 5, left: "כל יום זהה לחלוטין לקודמו", right: "כל יום הוא חדש ושונה" },
+  { id: 6, left: "לו יכולתי לבחור, לא הייתי נולד/ת", right: "הייתי רוצה לחיות 9 תקופות חיים" },
+  { id: 7, left: "לאחר פרישתי לא אעשה דבר", right: "אעשה דברים מרגשים שמזמן רציתי" },
+  { id: 8, left: "בהשגת מטרותיי בחיים, לא התקדמתי כלל", right: "השגתי אותן במלואן" },
+  { id: 9, left: "חיי ריקים", right: "חיי מלאים בדברים טובים" },
+  { id: 10, left: "אם אמות היום, ארגיש שחיי היו חסרי ערך", right: "ארגיש שחיי היו בעלי ערך רב" },
+  { id: 11, left: "במחשבה על חיי, אני תוהה מדוע אני קיים/ת", right: "אני תמיד רואה סיבה לקיומי" },
+  { id: 12, left: "העולם נראה לי מבלבל לחלוטין", right: "העולם משתלב באופן משמעותי בחיי" },
+  { id: 13, left: "אני מאוד לא אחראי/ת", right: "אני מאוד אחראי/ת" },
+  { id: 14, left: "האדם מוגבל מאוד על ידי תורשה וסביבה", right: "האדם חופשי לחלוטין לבחור את חייו" },
+  { id: 15, left: "בקשר למוות, אני בלתי מוכן/נה ומלא/ה חרדה", right: "אני מוכן/נה ואיני חרד/ה" },
+  { id: 16, left: "חשבתי ברצינות על התאבדות כמוצא", right: "לא הקדשתי להתאבדות שום מחשבה" },
+  { id: 17, left: "אין לי כל יכולת למצוא משמעות בחיים", right: "יש לי יכולת רבה למצוא משמעות בחיים" },
+  { id: 18, left: "חיי הם מעבר לשליטתי האישית", right: "חיי הם בשליטתי המלאה" },
+  { id: 19, left: "ההתמודדות עם משימות יומיומיות היא מקור לסבל", right: "מקור להנאה" },
+  { id: 20, left: "גיליתי שאין לי ייעוד או מטרה", right: "מצאתי מטרות ברורות וייעוד מספק" }
+];
+
+export default function App() {
+  const [answers, setAnswers] = useState({});
+  const [showResult, setShowResult] = useState(false);
+  const [score, setScore] = useState(0);
+  const resultRef = useRef(null);
+
+  const handleSelect = (questionId, value) => {
+    setAnswers(prev => ({
+      ...prev,
+      [questionId]: value
+    }));
+  };
+
+  const calculateScore = () => {
+    const total = Object.values(answers).reduce((acc, curr) => acc + curr, 0);
+    setScore(total);
+    setShowResult(true);
+  };
+
+  useEffect(() => {
+    if (showResult && resultRef.current) {
+      resultRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [showResult]);
+
+  const getResultInterpretation = () => {
+    if (score < 92) {
+      return {
+        title: "ריק קיומי / חוסר משמעות (מתחת ל-92)",
+        description: "הציון מצביע על היעדר משמעות ומטרות ברורות בחיים. מומלץ לבחון דרכים לחיזוק החוסן האישי והתייעצות עם גורמים מקצועיים במידת הצורך.",
+        color: "text-red-600",
+        bgColor: "bg-red-50",
+        borderColor: "border-red-200",
+        icon: <ShieldAlert className="w-8 h-8 text-red-600 mb-2" />
+      };
+    } else if (score >= 92 && score <= 112) {
+      return {
+        title: "טווח ביניים / חוסר החלטיות (92 - 112)",
+        description: "הציון נמצא בטווח הביניים. קיימת רמה מסוימת של משמעות אך היא עשויה להפיק תועלת מגיבוש מטרות נוסף.",
+        color: "text-yellow-600",
+        bgColor: "bg-yellow-50",
+        borderColor: "border-yellow-200",
+        icon: <AlertTriangle className="w-8 h-8 text-yellow-600 mb-2" />
+      };
+    } else {
+      return {
+        title: "נוכחות משמעות חיים ברורה (מעל 112)",
+        description: "הציון מצביע על תחושת משמעות ומטרה ברורה בחייך, המהווה בסיס מצוין לחוסן נפשי ואחריות אישית.",
+        color: "text-green-600",
+        bgColor: "bg-green-50",
+        borderColor: "border-green-200",
+        icon: <CheckCircle className="w-8 h-8 text-green-600 mb-2" />
+      };
+    }
+  };
+
+  const isComplete = Object.keys(answers).length === questionsData.length;
+  const progress = (Object.keys(answers).length / questionsData.length) * 100;
+
+  const resetTest = () => {
+    setAnswers({});
+    setShowResult(false);
+    setScore(0);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  return (
+    <div dir="rtl" className="bg-transparent font-sans text-slate-800 p-0">
+      <main className="max-w-4xl mx-auto p-4 sm:p-6 pb-12">
+        {/* Intro Card */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
+          <h2 className="text-2xl font-bold text-slate-800 mb-2 flex items-center">
+            <ClipboardList className="w-6 h-6 ml-2 text-orange-500" />
+            מבחן משמעות החיים (PIL Test)
+          </h2>
+          <p className="text-sm text-slate-500 mb-4">
+            מבוסס על שאלון J.C. Crumbaugh & L.T. Maholick.
+          </p>
+          <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg flex items-start">
+            <Info className="w-5 h-5 text-blue-600 ml-3 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-blue-900">
+              <strong>הוראות מילוי:</strong> סמן/י מספר אחד בכל משפט. 
+              הספרה <strong>1</strong> מסמלת את הצד השלילי ביותר, והספרה <strong>7</strong> מסמלת את החיובי ביותר. 
+              <em> מומלץ להימנע ככל האפשר מסימון הספרה 4 (ניטרלי).</em>
+            </div>
+          </div>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="sticky top-4 z-10 bg-slate-50/90 backdrop-blur-sm pt-2 pb-4 px-2 rounded-lg">
+          <div className="flex justify-between text-sm font-semibold text-slate-600 mb-2">
+            <span>התקדמות השאלון</span>
+            <span>{Object.keys(answers).length} / {questionsData.length}</span>
+          </div>
+          <div className="w-full bg-slate-200 rounded-full h-2.5">
+            <div 
+              className="bg-orange-500 h-2.5 rounded-full transition-all duration-300" 
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+        </div>
+
+        {/* Questionnaire */}
+        <div className="space-y-6 mt-6">
+          {questionsData.map((q) => (
+            <div 
+              key={q.id} 
+              className={`bg-white p-5 rounded-xl shadow-sm border transition-all duration-200 ${
+                answers[q.id] ? 'border-slate-300' : 'border-slate-100 hover:border-slate-300'
+              }`}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <span className="bg-slate-100 text-slate-600 font-bold px-3 py-1 rounded-full text-sm">שאלה {q.id}</span>
+              </div>
+              
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 text-center md:text-right font-medium text-slate-700">
+                <div className="w-full md:w-1/3 text-right text-slate-500 text-sm md:text-base">{q.left}</div>
+                
+                <div className="w-full md:w-1/3 flex justify-center gap-1 sm:gap-2 dir-ltr">
+                  {[1, 2, 3, 4, 5, 6, 7].map(num => (
+                    <button
+                      key={num}
+                      onClick={() => handleSelect(q.id, num)}
+                      className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all focus:outline-none ${
+                        answers[q.id] === num 
+                          ? 'bg-orange-500 text-white shadow-md transform scale-110' 
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="w-full md:w-1/3 text-left text-slate-800 text-sm md:text-base">{q.right}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Submit Button */}
+        <div className="mt-8 text-center">
+          <button
+            onClick={calculateScore}
+            disabled={!isComplete}
+            className={`px-8 py-4 rounded-xl font-bold text-lg flex items-center justify-center mx-auto transition-all ${
+              isComplete 
+                ? 'bg-orange-500 text-white hover:bg-orange-600 hover:shadow-lg cursor-pointer' 
+                : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+            }`}
+          >
+            {isComplete ? 'קבלת תוצאות המבדק' : 'יש להשיב על כל השאלות'}
+            {isComplete && <ArrowLeft className="w-5 h-5 mr-2" />}
+          </button>
+        </div>
+
+        {/* Results Section */}
+        {showResult && (
+          <div ref={resultRef} className="mt-12">
+            <div className={`p-8 rounded-2xl border-2 ${getResultInterpretation().borderColor} ${getResultInterpretation().bgColor} shadow-md text-center`}>
+              <div className="flex justify-center">
+                {getResultInterpretation().icon}
+              </div>
+              <h3 className={`text-2xl font-bold mb-2 ${getResultInterpretation().color}`}>
+                ציון סופי: {score} נקודות
+              </h3>
+              <h4 className="text-xl font-semibold text-slate-800 mb-4">
+                {getResultInterpretation().title}
+              </h4>
+              <p className="text-slate-700 text-lg max-w-2xl mx-auto mb-6">
+                {getResultInterpretation().description}
+              </p>
+              
+              <div className="mt-6 pt-6 border-t border-slate-200 flex flex-col items-center gap-4">
+                <p className="text-xs text-slate-500 italic max-w-md">
+                  פותח ככלי עזר בלבד ואינו מהווה אבחנה רפואית-פסיכיאטרית.
+                </p>
+                <button 
+                  onClick={resetTest}
+                  className="px-6 py-2 bg-white text-slate-700 font-semibold rounded-lg shadow-sm border border-slate-200 hover:bg-slate-50 flex items-center justify-center"
+                >
+                  <RefreshCw className="w-4 h-4 ml-2" />
+                  ביצוע מבדק חדש
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
