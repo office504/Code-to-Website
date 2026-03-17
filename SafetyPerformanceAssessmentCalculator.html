@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מחשבון הערכת ביצועי בטיחות</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brandBlue: 'rgb(49, 103, 167)',
+                        brandTurquoise: 'rgb(79, 194, 212)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap');
+        body { font-family: 'Assistant', sans-serif; background-color: #fcfcfc; }
+        .answer-btn { transition: all 0.2s ease; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        const questions = [
+            { id: 1, text: "האם נערכים מבדקי בטיחות רשמיים במרווחי זמן קבועים כחלק משגרת העבודה בארגון?" },
+            { id: 2, text: "האם כל העובדים בארגון בוחנים את שיפורי הבטיחות המיושמים בארגון?" },
+            { id: 3, text: "האם מנהלי הבטיחות בארגון מדווחים על ליקויי בטיחות ובריאות שזיהו ופועלים לתיקונם?" },
+            { id: 4, text: "האם הארגון מעודד עובדים לדווח על סיכונים וליקויים ללא חשש?" },
+            { id: 5, text: "האם לכל העובדים בארגון יש הידע, המיומנות והיכולת לפתור בעיות בטיחות הקשורות לתפקידם?" },
+            { id: 6, text: "האם ניתנת לעובדים הזדמנות להשתתף בדיונים בנושאים העלולים להשפיע על בטיחותם (למשל בהערכת סיכונים)?" },
+            { id: 7, text: "האם חברי ועדת הבטיחות ונאמני הבטיחות פעילים ומוכרים לכל העובדים?" },
+            { id: 8, text: "האם אחראי הבטיחות בארגון מורשים לבצע שינויים שזוהו כנחוצים?" },
+            { id: 9, text: "האם גורמי סיכון תעסוקתיים והיבטי בטיחות אחרים מטופלים בזמן?" },
+            { id: 10, text: "האם מחסומים או קשיים להפחתת גורמי סיכון מובאים לידיעה ומטופלים?" },
+            { id: 11, text: "האם העובדים הפועלים באופן בטיחותי מקבלים משוב חיובי?" },
+            { id: 12, text: "האם בהערכת העובדים ובשיקולים לקידום מובא נושא תפקודו הבטיחותי של העובד?" },
+            { id: 13, text: "האם לכל העובדים יש את האמצעים, הכלים או הציוד על מנת להשלים את עבודתם באופן בטיחותי?" },
+            { id: 14, text: "האם קיים מעקב וניתוח של אירועי 'כמעט ונפגע' לצורך למידה?" }
+        ];
+
+        const options = [
+            { val: 0, label: "0-20%", desc: "כמעט אף פעם" },
+            { val: 1, label: "20-40%", desc: "לעיתים רחוקות" },
+            { val: 2, label: "40-60%", desc: "מחצית מהזמן" },
+            { val: 3, label: "60-80%", desc: "לרוב" },
+            { val: 4, label: "80-100%", desc: "תמיד / כמעט תמיד" }
+        ];
+
+        function App() {
+            const [answers, setAnswers] = useState({});
+            const [submitted, setSubmitted] = useState(false);
+
+            const score = useMemo(() => {
+                const values = Object.values(answers);
+                if (values.length === 0) return 0;
+                const sum = values.reduce((a, b) => a + b, 0);
+                return ((sum / (questions.length * 4)) * 100).toFixed(1);
+            }, [answers]);
+
+            const getLevel = (s) => {
+                if (s < 50) return { label: "רמה נמוכה - נדרשת תכנית שיפור מיידית", color: "text-red-600" };
+                if (s < 75) return { label: "רמה בינונית - קיימת תשתית אך ישנם פערים ביישום", color: "text-orange-500" };
+                return { label: "רמה גבוהה - ביצועי בטיחות טובים מאוד", color: "text-green-600" };
+            };
+
+            return (
+                <div className="max-w-3xl mx-auto p-4 bg-white min-h-screen">
+                    {/* Intro Section */}
+                    <div className="mb-8 border-b-2 border-brandTurquoise pb-4">
+                        <h1 className="text-2xl font-bold text-brandBlue mb-2">מחשבון הערכת ביצועי בטיחות ובריאות (IWH)</h1>
+                        <p className="text-slate-600 text-sm leading-relaxed">
+                            השב על השאלות על פי שיעור הזמן (באחוזים) המושקע לביצוע המשימות בארגון. 
+                            המקור: המוסד הקנדי לעבודה ולבריאות (IWH).
+                        </p>
+                    </div>
+
+                    {/* Progress */}
+                    <div className="sticky top-0 bg-white/90 backdrop-blur shadow-sm p-3 mb-6 flex items-center justify-between border-b border-slate-100 z-10">
+                        <div className="text-xs font-bold text-brandBlue">השלמה: {Object.keys(answers).length}/{questions.length}</div>
+                        <div className="w-48 bg-slate-100 h-2 rounded-full overflow-hidden">
+                            <div className="bg-brandTurquoise h-full transition-all duration-300" style={{width: `${(Object.keys(answers).length/questions.length)*100}%`}}></div>
+                        </div>
+                    </div>
+
+                    {/* Questions */}
+                    <div className="space-y-8">
+                        {questions.map((q, idx) => (
+                            <div key={q.id} className="group">
+                                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex gap-2">
+                                    <span className="text-brandTurquoise">{idx + 1}.</span>
+                                    {q.text}
+                                </h3>
+                                <div className="grid grid-cols-5 gap-2">
+                                    {options.map(opt => (
+                                        <button
+                                            key={opt.val}
+                                            onClick={() => setAnswers(prev => ({...prev, [q.id]: opt.val}))}
+                                            className={`flex flex-col items-center p-2 rounded-lg border-2 transition-all ${
+                                                answers[q.id] === opt.val 
+                                                ? 'border-brandBlue bg-brandBlue text-white shadow-md transform scale-105' 
+                                                : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-brandTurquoise'
+                                            }`}
+                                        >
+                                            <span className="text-xs font-bold">{opt.val}</span>
+                                            <span className="text-[10px] sm:text-xs opacity-80 leading-tight">{opt.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Footer Action */}
+                    <div className="mt-12 mb-20 text-center">
+                        {!submitted ? (
+                            <button 
+                                disabled={Object.keys(answers).length < questions.length}
+                                onClick={() => setSubmitted(true)}
+                                className={`px-12 py-4 rounded-full font-bold text-white text-lg transition-all ${
+                                    Object.keys(answers).length === questions.length 
+                                    ? 'bg-brandBlue hover:bg-brandBlue/90 shadow-xl cursor-pointer' 
+                                    : 'bg-slate-300 cursor-not-allowed'
+                                }`}
+                            >
+                                חישוב רמת ביצועים
+                            </button>
+                        ) : (
+                            <div className="bg-slate-50 border-2 border-brandBlue p-8 rounded-3xl animate-in fade-in zoom-in duration-500">
+                                <div className="text-slate-500 uppercase tracking-widest text-sm mb-1">ציון ביצועים משוקלל</div>
+                                <div className="text-6xl font-black text-brandBlue mb-4">{score}%</div>
+                                <div className={`text-xl font-bold mb-4 ${getLevel(score).color}`}>
+                                    {getLevel(score).label}
+                                </div>
+                                <button 
+                                    onClick={() => {setAnswers({}); setSubmitted(false); window.scrollTo(0,0);}}
+                                    className="text-brandTurquoise font-semibold hover:underline flex items-center justify-center mx-auto gap-2"
+                                >
+                                    ביצוע הערכה מחדש
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
